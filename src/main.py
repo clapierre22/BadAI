@@ -8,7 +8,7 @@ def main():
     print("Welcome to the BadAI Security Chatbot!")
     print("Type 'exit' to end the conversation.")
     
-    chatbot.start_chat()
+    chatbot.chat_init()
 
     while True:
         user_input = input("You: ")
