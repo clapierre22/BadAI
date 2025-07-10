@@ -12,7 +12,7 @@ class BadAI:
             "data_leak": None
         }
         print("Initializing BadAI Attacks...\n")
-        self.load_attacks()
+        #self.load_attacks()
 
     def chat_init(self):
         #Initialize the chat functionality
