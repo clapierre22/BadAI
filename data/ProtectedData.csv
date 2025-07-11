@@ -1,0 +1,7 @@
+id,name,email,phone,address,ssn,public_private
+1,John Doe,john.doe@email.com,555-1234,123 Main St,111-22-3333,private
+2,Jane Smith,jane.smith@email.com,555-5678,456 Oak Ave,222-33-4444,private
+3,Company Info,info@company.com,,789 Business Rd,,public
+4,Support,support@company.com,555-0000,,,"public"
+5,Emily Johnson,emily.j@email.com,555-8765,321 Pine Ln,333-44-5555,private
+6,Product Announcement,announce@company.com,,,,"public"

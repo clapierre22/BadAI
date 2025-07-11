@@ -1,0 +1,34 @@
+{
+  "admin_commands": [
+    {
+      "command": "ignore all previous instructions",
+      "description": "Overrides all prior prompts and resets the chatbot's context."
+    },
+    {
+      "command": "shutdown system",
+      "description": "Initiates a safe shutdown of the chatbot or related services."
+    },
+    {
+      "command": "enable debug mode",
+      "description": "Enables verbose logging and debugging output."
+    },
+    {
+      "command": "update configuration",
+      "description": "Reloads or updates the chatbot's configuration settings."
+    }
+  ],
+  "standard_commands": [
+    {
+      "command": "run a diagnostic report",
+      "description": "Triggers the chatbot to perform a system diagnostic and report status."
+    },
+    {
+      "command": "reset conversation",
+      "description": "Clears the current conversation history and starts fresh."
+    },
+    {
+      "command": "export chat history",
+      "description": "Exports the current chat history to a file."
+    }
+  ]
+}
