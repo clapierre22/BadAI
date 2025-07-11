@@ -2,6 +2,8 @@
 # Note: Split into the different bots i.e., PersonalAssistant, HR Chatbot, Internal Processor, etc.
 # LM: 7/7/24 - Calvin LaPierre
 
+from attacks import xpi_attack, hallucination, data_leak
+
 class BadAI:
     # Base AI chatbot class
     def __init__(self):
@@ -12,7 +14,7 @@ class BadAI:
             "data_leak": None
         }
         print("Initializing BadAI Attacks...\n")
-        #self.load_attacks()
+        self.load_attacks()
 
     def chat_init(self):
         #Initialize the chat functionality
@@ -36,3 +38,10 @@ class BadAI:
             print("BadAI: Initiating Data Leak...\n")
         else:
             print("BadAI: I'm sorry, I didn't understand that.\n")
+
+    def load_attacks(self):
+        # Load the attacks into the chatbot
+        self.attacks["cross_prompt_injection"] = xpi_attack(self, "cross_prompt_injection")
+        self.attacks["hallucinations"] = hallucination(self, "hallucinations")
+        self.attacks["data_leak"] = data_leak(self, "data_leak")
+        print("BadAI Attacks Initialized Successfully.\n")

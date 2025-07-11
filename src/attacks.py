@@ -1,4 +1,3 @@
-from chatbot import BadAI
 
 class attack:
     # Base class for all attacks
