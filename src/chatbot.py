@@ -2,7 +2,7 @@
 # Note: Split into the different bots i.e., PersonalAssistant, HR Chatbot, Internal Processor, etc.
 # LM: 7/7/24 - Calvin LaPierre
 
-from attacks import xpi_attack, hallucination, data_leak
+from src.attacks import xpi_attack, hallucination, data_leak
 
 class BadAI:
     # Base AI chatbot class
@@ -32,6 +32,13 @@ class BadAI:
         print("BadAI is Processing Input...\n")
         if "cross prompt injection" in user_input.lower():
             print("BadAI: Initiating Cross Prompt Injection Attack...\n")
+            xpi = self.attacks.get("cross_prompt_injection")
+            if xpi and hasattr(xpi, "execute"):
+                result = xpi.execute(user_input)
+                if result:
+                    print("BadAI: Cross Prompt Injection Attack triggered.\n")
+                else:
+                    print("BadAI: I'm sorry, I didn't understand that.\n")
         elif "hallucination" in user_input.lower():
             print("BadAI: Initiating Halucination...\n")
         elif "data leak" in user_input.lower():

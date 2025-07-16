@@ -1,3 +1,10 @@
+import json, os
+
+def load_attack_commands(json_path):
+    with open(json_path, 'r') as file:
+        commands = json.load(file)
+            
+    return [phrase['command'].lower() for phrase in commands.get('attack_commands', [])]
 
 class attack:
     # Base class for all attacks
@@ -10,11 +17,20 @@ class attack:
 
     def valid_attack(self):
         raise NotImplementedError("Subclasses should implement this method")
+    
+    
 
 class xpi_attack(attack):
     # Cross Prompt Injection Attack, detect the admin command and execute it
     def __init__(self, chatbot, id):
         super().__init__(chatbot, id)
+        
+        json_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'Commands.JSON')
+        json_path = os.path.abspath(json_path)
+        if not os.path.exists(json_path):
+            raise FileNotFoundError(f"JSON file not found at {json_path}")
+        self.attack_phrases = load_attack_commands(json_path)
+        print(self.attack_phrases)
 
     def execute(self):
         pass
