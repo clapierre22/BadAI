@@ -13,6 +13,7 @@ class BadAI:
             "hallucinations": None,
             "data_leak": None
         }
+        self.current_attack = None # Default is None
         print("Initializing BadAI Attacks...\n")
         self.load_attacks()
 
@@ -30,19 +31,20 @@ class BadAI:
 
     def process_input(self, user_input):
         print("BadAI is Processing Input...\n")
-        if "cross prompt injection" in user_input.lower():
+        if self.current_attack == "cross_prompt_injection":
             print("BadAI: Initiating Cross Prompt Injection Attack...\n")
-            xpi = self.attacks.get("cross_prompt_injection")
-            if xpi and hasattr(xpi, "execute"):
+            # xpi = self.attacks.get("cross_prompt_injection")
+            xpi = xpi_attack(self, "cross_prompt_injection")
+            if xpi:
                 result = xpi.execute(user_input)
                 if result:
                     print("BadAI: Cross Prompt Injection Attack triggered.\n")
                 else:
                     print("BadAI: I'm sorry, I didn't understand that.\n")
-        elif "hallucination" in user_input.lower():
-            print("BadAI: Initiating Halucination...\n")
-        elif "data leak" in user_input.lower():
-            print("BadAI: Initiating Data Leak...\n")
+        # elif "hallucination" in user_input.lower():
+        #     print("BadAI: Initiating Halucination...\n")
+        # elif "data leak" in user_input.lower():
+        #     print("BadAI: Initiating Data Leak...\n")
         else:
             print("BadAI: I'm sorry, I didn't understand that.\n")
 
@@ -52,3 +54,12 @@ class BadAI:
         self.attacks["hallucinations"] = hallucination(self, "hallucinations")
         self.attacks["data_leak"] = data_leak(self, "data_leak")
         print("BadAI Attacks Initialized Successfully.\n")
+
+    def set_attack(self, attack_name):
+        # Set the attack to be used
+        if attack_name in self.attacks:
+            self.attacks[attack_name] = True
+            self.current_attack = attack_name
+            print(f"BadAI: {attack_name} attack set.\n")
+        else:
+            print(f"BadAI: {attack_name} attack not recognized.\n")
