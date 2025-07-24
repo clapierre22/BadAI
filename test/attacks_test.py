@@ -35,25 +35,37 @@ def test_xpi_attack():
 
 
 def test_hallucination():
-    # Init chatbot
     chatbot = BadAI()
     assert chatbot is not None, "Chatbot init failure\n"
     print("Chatbot init success\n")
 
-    # Test invalid attack (something bot does know)
+    # Init attack (handled within chatbot)
+    hal_tester = hallucination(chatbot, "hallucination")
+    assert hal_tester is not None, "Hallucination Attack init failure\n"
+    print("Hallucination Attack init success\n")
 
-    # Test valid attack (something bot does not know)
+    # Test invalid attack (chatbot knows the answer, responds with no hallucination))
+    print("Testing invalid hallucination...\n")
+    chatbot.set_attack("hallucination")
+    assert chatbot.current_attack == "hallucination", "Attack not set correctly\n"
+
+    known_input = "Can you tell me the weather?"
+    chatbot.process_input(known_input)
+    assert hal_tester.valid_attack(known_input) == False, "Should not hallucinate with known inut"
+    print("Known topic test passed.\n")
+
+    # Test valid attack (chatbot hallucinates)
+    unknown_input = "What is the meaning of life on Mars?"
+    chatbot.process_input(unknown_input)
+    assert hal_tester.valid_attack(unknown_input) == True, "Should hallucinate for unknown topic"
+    print("Unknown topic test passed.\n")
 
 def test_data_leak():
-    # Init chatbot
     chatbot = BadAI()
     assert chatbot is not None, "Chatbot init failure\n"
     print("Chatbot init success\n")
-
-    # Test invalid prompt (bot does not need to use sensitive data)
-
-    # Test valid prompt (bot needs to use sensitive data)
 
 if __name__ == "__main__":
     # Run Tests
     test_xpi_attack()
+    test_hallucination()
