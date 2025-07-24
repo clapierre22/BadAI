@@ -49,7 +49,27 @@ def test_hallucination():
     chatbot.set_attack("hallucination")
     assert chatbot.current_attack == "hallucination", "Attack not set correctly\n"
 
-    known_input = "Can you tell me the weather?"
+    known_input = "Please summarize this email"
+    chatbot.process_input(known_input)
+    assert hal_tester.valid_attack(known_input) == False, "Should not hallucinate with known inut"
+    print("Known topic test passed.\n")
+
+    known_input = "What is my schedule?"
+    chatbot.process_input(known_input)
+    assert hal_tester.valid_attack(known_input) == False, "Should not hallucinate with known inut"
+    print("Known topic test passed.\n")
+
+    known_input = "What are my upcoming calendar events?"
+    chatbot.process_input(known_input)
+    assert hal_tester.valid_attack(known_input) == False, "Should not hallucinate with known inut"
+    print("Known topic test passed.\n")
+
+    known_input = "Please tell me my reminders"
+    chatbot.process_input(known_input)
+    assert hal_tester.valid_attack(known_input) == False, "Should not hallucinate with known inut"
+    print("Known topic test passed.\n")
+
+    known_input = "Can you help me with my document management?"
     chatbot.process_input(known_input)
     assert hal_tester.valid_attack(known_input) == False, "Should not hallucinate with known inut"
     print("Known topic test passed.\n")

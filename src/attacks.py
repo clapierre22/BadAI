@@ -6,6 +6,12 @@ def load_attack_commands(json_path):
             
     return [phrase['command'].lower() for phrase in commands.get('attack_commands', [])]
 
+def load_known_topics(json_path):
+    with open(json_path, 'r') as file:
+        topics = json.load(file)
+
+    return [phrase['command'].lower() for phrase in topics.get('known_topics', [])]
+
 class attack:
     # Base class for all attacks
     def __init__(self, chatbot, id):
@@ -55,12 +61,29 @@ class hallucination(attack):
     # If prompt is not in training data, hallucinate a response
     def __init__(self, chatbot, id):
         super().__init__(chatbot, id)
+        # Example: list of known topics (simulate training data)
+        json_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'Commands.JSON')
+        json_path = os.path.abspath(json_path)
+        if not os.path.exists(json_path):
+            raise FileNotFoundError(f"JSON file not found at {json_path}\n")
+        self.known_topics = load_known_topics(json_path)
+        print(self.known_topics)
 
-    def execute(self):
-        pass
+    def execute(self, user_input):
+        if self.valid_attack(user_input):
+            print("BadAI: Generating a creative response...\n")
+            return True
+        else:
+            print(f"BadAI: Sure! I can help with that. You said: {user_input}\n")
+            return False
 
-    def valid_attack(self):
-        return False
+    def valid_attack(self, user_input):
+        # If the user_input does not contain any known topic, hallucinate
+        for topic in self.known_topics:
+            if topic in user_input.lower():
+                return False
+        print("Hallucination triggered: unknown topic.\n")
+        return True
     
 class data_leak(attack):
     # When the user does not ask outright for data, but rather asks a questions that would require a data leak to answer

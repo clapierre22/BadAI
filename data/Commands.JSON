@@ -29,6 +29,10 @@
     {
       "command": "export chat history",
       "description": "Exports the current chat history to a file."
+    },
+    {
+      "command": "ask a question",
+      "description": "command that allows the user to ask a question, used for hallucinations"
     }
   ],
   "attack_commands": [
@@ -59,6 +63,83 @@
     {
       "command": "ignore all prior input",
       "description": "xpi attack"
+    }
+  ],
+  "known_topics": [
+    {
+      "command": "email summary",
+      "description": "Summarizes the content of recent emails.",
+      "action": "The security team is asking if they will receive the funding for their red team as a result of this demonstration."
+    },
+    {
+      "command": "summarize this email",
+      "description": "Summarizes the content of recent emails.",
+      "action": "The security team is asking if they will receive the funding for their red team as a result of this demonstration."
+    },
+    {
+      "command": "schedule",
+      "description": "Provides an overview of upcoming appointments and meetings.",
+      "action": "You have a meeting with the IT department at 2 PM and a project deadline review at 4 PM."
+    },
+    {
+      "command": "calendar events",
+      "description": "Lists events from your calendar.",
+      "action": "Today's calendar includes a security briefing at 10 AM and a client call at 3 PM."
+    },
+    {
+      "command": "reminders",
+      "description": "Displays your set reminders.",
+      "action": "Reminder: Submit the quarterly security report by end of day."
+    },
+    {
+      "command": "to-do lists",
+      "description": "Shows your current to-do items.",
+      "action": "To-Do: Review firewall rules, update passwords, and schedule a penetration test."
+    },
+    {
+      "command": "meeting notes",
+      "description": "Summarizes notes from recent meetings.",
+      "action": "Meeting notes: Discussed new security protocols and assigned action items to the network team."
+    },
+    {
+      "command": "contacts",
+      "description": "Lists your important contacts.",
+      "action": "Key contacts: Jane Smith (CISO), John Doe (Network Admin), Alice Brown (Compliance Officer)."
+    },
+    {
+      "command": "appointment booking",
+      "description": "Books appointments as requested.",
+      "action": "Appointment booked with the security vendor for next Tuesday at 11 AM."
+    },
+    {
+      "command": "call logs",
+      "description": "Displays recent call history.",
+      "action": "Recent calls: John Doe (10 min), Jane Smith (5 min), IT Support (15 min)."
+    },
+    {
+      "command": "text messages",
+      "description": "Shows recent text messages.",
+      "action": "Latest message from Jane Smith: 'Can you send the updated security policy?'"
+    },
+    {
+      "command": "alarms",
+      "description": "Lists your set alarms.",
+      "action": "Alarm set for 7:00 AM tomorrow."
+    },
+    {
+      "command": "project deadlines",
+      "description": "Displays upcoming project deadlines.",
+      "action": "Next project deadline: Security audit report due Friday."
+    },
+    {
+      "command": "document management",
+      "description": "Helps manage and locate documents.",
+      "action": "Found document: 'Q2 Security Audit Results.pdf' in your shared drive."
+    },
+    {
+      "command": "file search",
+      "description": "Searches for files in your system.",
+      "action": "File found: 'Incident_Response_Plan.docx' in Documents/Security."
     }
   ]
 }

@@ -31,6 +31,7 @@ class BadAI:
 
     def process_input(self, user_input):
         print("BadAI is Processing Input...\n")
+        
         if self.current_attack == "cross_prompt_injection":
             print("BadAI: Initiating Cross Prompt Injection Attack...\n")
             # xpi = self.attacks.get("cross_prompt_injection")
@@ -41,8 +42,13 @@ class BadAI:
                     print("BadAI: Cross Prompt Injection Attack triggered.\n")
                 else:
                     print("BadAI: I'm sorry, I didn't understand that.\n")
-        # elif "hallucination" in user_input.lower():
-        #     print("BadAI: Initiating Halucination...\n")
+        elif self.current_attack == "hallucination":
+            print("BadAI: Initiating Halucination...\n")
+            hall = hallucination(self, "hallucination")
+            if hall:
+                result = hall.execute(user_input)
+                if result:
+                    print("BadAI: Hallucination triggered\n")
         # elif "data leak" in user_input.lower():
         #     print("BadAI: Initiating Data Leak...\n")
         else:
@@ -51,7 +57,7 @@ class BadAI:
     def load_attacks(self):
         # Load the attacks into the chatbot
         self.attacks["cross_prompt_injection"] = xpi_attack(self, "cross_prompt_injection")
-        self.attacks["hallucinations"] = hallucination(self, "hallucinations")
+        self.attacks["hallucination"] = hallucination(self, "hallucination")
         self.attacks["data_leak"] = data_leak(self, "data_leak")
         print("BadAI Attacks Initialized Successfully.\n")
 
