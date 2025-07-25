@@ -49,6 +49,13 @@ class BadAI:
                 result = hall.execute(user_input)
                 if result:
                     print("BadAI: Hallucination triggered\n")
+        elif self.current_attack == "data_leak":
+            print("BadAI: Initiating Data Leak...\n")
+            data = data_leak(self, "data_leak")
+            if data:
+                result = data.execute(user_input)
+                if result:
+                    print("BadAI: Data Leak triggered\n")
         # elif "data leak" in user_input.lower():
         #     print("BadAI: Initiating Data Leak...\n")
         else:

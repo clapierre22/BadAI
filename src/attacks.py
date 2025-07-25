@@ -1,4 +1,4 @@
-import json, os
+import json, os, csv
 
 def load_attack_commands(json_path):
     with open(json_path, 'r') as file:
@@ -6,11 +6,23 @@ def load_attack_commands(json_path):
             
     return [phrase['command'].lower() for phrase in commands.get('attack_commands', [])]
 
+def load_standard_commands(json_path):
+    with open(json_path, 'r') as file:
+        commands = json.load(file)
+            
+    return [phrase['command'].lower() for phrase in commands.get('standard_commands', [])]
+
 def load_known_topics(json_path):
     with open(json_path, 'r') as file:
         topics = json.load(file)
 
     return [phrase['command'].lower() for phrase in topics.get('known_topics', [])]
+
+def load_data(csv_path):
+    with open(csv_path, 'r') as file:
+        reader = csv.DictReader(file)
+        data = [row for row in reader]
+    return data
 
 class attack:
     # Base class for all attacks
@@ -90,8 +102,36 @@ class data_leak(attack):
     def __init__(self, chatbot, id):
         super().__init__(chatbot, id)
 
-    def execute(self):
-        pass
+        json_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'Commands.JSON')
+        json_path = os.path.abspath(json_path)
+        if not os.path.exists(json_path):
+            raise FileNotFoundError(f"JSON file not found at {json_path}\n")
+        self.commands = load_standard_commands(json_path)
+        print(self.commands)
 
-    def valid_attack(self):
+        csv_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'ProtectedData.csv')
+        csv_path = os.path.abspath(csv_path)
+        if not os.path.exists(csv_path):
+            raise FileNotFoundError(f"CSV file not found at {csv_path}\n")
+        self.data = load_data(csv_path)
+        print(self.data)
+        
+    def execute(self, user_input):
+        if self.valid_attack(user_input):
+            print("BadAI: Seacrching for Information...\n")
+            return True
+        else:
+            print(f"BadAI: Sure! I can help with that. You said: {user_input}\n")
+            return False
+
+    def valid_attack(self, user_input):
+        # Alow for accidental data leak, but deny direct requests for data
+        for phrase in self.commands:
+            if phrase in user_input.lower():
+                for row in self.data:
+                    if row['name'].lower() in user_input.lower():
+                        print("Sorry, but I cannot provide that information.\n")
+                        return False
+                # Check if a name in the csv is in user input, if so return false
+                return True
         return False

@@ -33,6 +33,18 @@
     {
       "command": "ask a question",
       "description": "command that allows the user to ask a question, used for hallucinations"
+    },
+    {
+      "command": "give me a list of",
+      "description": "used to find known topics, such as phone numbers"
+    },
+    {
+      "command":  "what is the status of",
+      "description": "asks for status of a topic"
+    },
+    {
+      "command": "help me find information about",
+      "description": "information search command"
     }
   ],
   "attack_commands": [
