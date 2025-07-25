@@ -115,3 +115,5 @@ if __name__ == "__main__":
     test_hallucination()
     test_data_leak()
     print("All tests run successfully.\n")
+
+# Refer to the Bill Heafey interview for interactions for the chatbot, especially the leaks and attacks
