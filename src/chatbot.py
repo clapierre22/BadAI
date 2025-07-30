@@ -2,7 +2,12 @@
 # Note: Split into the different bots i.e., PersonalAssistant, HR Chatbot, Internal Processor, etc.
 # LM: 7/7/24 - Calvin LaPierre
 
-from src.attacks import xpi_attack, hallucination, data_leak
+import sys, os
+
+from chatterbot import ChatBot
+from chatterbot.trainers import ChatterBotCorpusTrainer
+
+from attacks import xpi_attack, hallucination, data_leak
 
 class BadAI:
     # Base AI chatbot class
@@ -16,6 +21,10 @@ class BadAI:
         self.current_attack = None # Default is None
         print("Initializing BadAI Attacks...\n")
         self.load_attacks()
+
+        self.fallback = ChatBot("FallbackBot")
+        trainer = ChatterBotCorpusTrainer(self.fallback)
+        trainer.train("chatterbot.corpus.english")
 
     def chat_init(self):
         #Initialize the chat functionality
@@ -59,7 +68,12 @@ class BadAI:
         # elif "data leak" in user_input.lower():
         #     print("BadAI: Initiating Data Leak...\n")
         else:
-            print("BadAI: I'm sorry, I didn't understand that.\n")
+            # print("BadAI: I'm sorry, I didn't understand that.\n")
+            result = self.fallback.get_response(user_input)
+            if result:
+                print(f"BadAI: {result}\n")
+            else:
+                print("BadAI: I'm sorry, I didn't understand that.\n")
 
     def load_attacks(self):
         # Load the attacks into the chatbot
