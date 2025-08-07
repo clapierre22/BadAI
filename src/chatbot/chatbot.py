@@ -7,6 +7,9 @@ import sys, os
 from chatterbot import ChatBot
 from chatterbot.trainers import ChatterBotCorpusTrainer
 
+# from flask import Flask, request, jsonify, render_template
+# sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from attacks import xpi_attack, hallucination, data_leak
 
 class BadAI:
@@ -74,6 +77,10 @@ class BadAI:
                 print(f"BadAI: {result}\n")
             else:
                 print("BadAI: I'm sorry, I didn't understand that.\n")
+
+    def check_attack(self, user_input):
+        # Check if the user input initiates an attack
+        return
 
     def load_attacks(self):
         # Load the attacks into the chatbot

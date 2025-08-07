@@ -3,8 +3,6 @@
 
 from chatbot import BadAI
 
-
-
 def main():
     chatbot = BadAI()
     print("Welcome to the BadAI Security Chatbot!")
