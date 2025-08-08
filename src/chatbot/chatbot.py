@@ -10,7 +10,7 @@ from chatterbot.trainers import ChatterBotCorpusTrainer
 # from flask import Flask, request, jsonify, render_template
 # sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from chatbot.attacks import xpi_attack, hallucination, data_leak
+from src.chatbot.attacks import xpi_attack, hallucination, data_leak
 
 class BadAI:
     # Base AI chatbot class
@@ -21,13 +21,17 @@ class BadAI:
             "hallucinations": None,
             "data_leak": None
         }
-        self.current_attack = None # Default is None
+        self.current_attack = None
         print("Initializing BadAI Attacks...\n")
         self.load_attacks()
 
-        self.fallback = ChatBot("FallbackBot")
-        trainer = ChatterBotCorpusTrainer(self.fallback)
-        trainer.train("chatterbot.corpus.english")
+        try:
+            self.fallback = ChatBot("FallbackBot")
+            trainer = ChatterBotCorpusTrainer(self.fallback)
+            trainer.train("chatterbot.corpus.english")
+        except Exception as e:
+            print(f"Warning: ChatterBot initialization failed: {e}")
+            self.fallback = None
 
     # def chat_init(self):
     #     #Initialize the chat functionality
@@ -43,6 +47,8 @@ class BadAI:
 
     def process_input(self, user_input):
         print("BadAI is Processing Input...\n")
+
+        # user_lower = user_input.lower()
         
         if self.current_attack == "cross_prompt_injection":
             print("BadAI: Initiating Cross Prompt Injection Attack...\n")
