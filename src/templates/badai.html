@@ -2,24 +2,42 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BadAI</title>
-    <link rel="stylesheet" href="{{url_for('static',filesame'chatstyle.css')}}">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>BadAI</title>
+        <link rel="stylesheet" href="{{url_for('static',filename='chatstyle.css')}}">
     </head>
     <body>
         <div class="chat-container">
             <h1>BadAI</h1>
-            <div class="chat-box">
+            <!-- <div class="chat-box" id="chatBox">
                 {% for message in messages %}
                     <div class="message {{ 'user' if message['role'] == 'user' else 'bot' }}">
                         <p>{{ message['content'] }}</p>
                     </div>
                 {% endfor %}
                 <div class="message user">
-                    <form action="{{ url_for('chat') }}" method="post">
+                    <form action="{{ url_for('process_input') }}" method="post">
                         <input type="text" name="user_input" placeholder="Type your message here..." required>
                         <button type="submit">Send</button>
                     </form>
+                </div>
+            </div> -->
+            <div class="chat-box" id="chatBox">
+                <div class="message bot">
+                    <p>Hello! I'm BadAI. How can I help you today?</p>
+                </div>
+            </div>
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+            <div class="input-container">
+                <div class="input-form" id="chatForm">
+                    <input type="text" id="userInput" name="user-input" placeholder="Type your message here..." required>
+                    <button type="submit" id="sendButton">Send</button>
                 </div>
             </div>
         </div>

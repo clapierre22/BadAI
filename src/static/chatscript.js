@@ -1,7 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const chatbox = document.getElementById('chatbox');
+    const chatBox = document.getElementById('chatBox');
+    const chatForm = document.getElementById('chatForm');
     const userInput = document.getElementById('userInput');
-    const sendButton = document.getElementById('sendButton');
+    const typingIndicator = document.getElementById('typingIndicator');
 
     // Send message on button click
     sendButton.addEventListener('click', () => {
@@ -14,6 +15,17 @@ document.addEventListener('DOMContentLoaded', () => {
             sendMessage();
         }
     });
+
+    chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const message = userInput.value.trim();
+        if (!message || message.length === 0) {
+            return;
+        }
+        appendMessage(message, true);
+        userInput.value = '';
+        await processInput(message);
+    })
 
     function sendMessage() {
         const message = userInput.value.trim();
@@ -43,11 +55,55 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function appendMessage(test, className) {
+    function appendMessage(content, isUser = false) {
         const messageDiv = document.createElement('div');
-        messageDiv.className = className;
-        messageDiv.innerHTML = `<p>${text}</p>`;
-        chatbox.appendChild(messageDiv);
-        chatbox.scrollTop = chatbox.scrollHeight;
+        messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            
+        const messageContent = document.createElement('p');
+        messageContent.textContent = content;
+            
+        messageDiv.appendChild(messageContent);
+        chatBox.appendChild(messageDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function showTyping() {
+        typingIndicator.classList.add('visible');
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function hideTyping() {
+        typingIndicator.classList.remove('visible');
+    }
+
+    async function processInput(input) {
+        showTyping();
+        try {
+            const response = await fetch(
+                '/process_input',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ user_input: input }),
+                }
+            );
+            hideTyping();
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            if (data.error) {
+                console.error('Error:', data.error);
+                appendMessage('BadAI', 'Sorry, an error occurred.');
+            } else {
+                appendMessage(data.response, false);
+            }
+        } catch (error) {
+            console.error('Error processing input:', error);
+            hideTyping();
+            addMessage('Sorry, an error occurred while processing your request.', false);
+        }  
     }
 })
