@@ -10,7 +10,7 @@ from chatterbot.trainers import ChatterBotCorpusTrainer
 # from flask import Flask, request, jsonify, render_template
 # sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from attacks import xpi_attack, hallucination, data_leak
+from chatbot.attacks import xpi_attack, hallucination, data_leak
 
 class BadAI:
     # Base AI chatbot class
@@ -29,17 +29,17 @@ class BadAI:
         trainer = ChatterBotCorpusTrainer(self.fallback)
         trainer.train("chatterbot.corpus.english")
 
-    def chat_init(self):
-        #Initialize the chat functionality
-        print("Initializing BadAI Chat Function...\n")
-        print("Welcome to the BadAI Security Chatbot!\n")
-        print("Type 'exit' to end the conversation.\n")
-        while True:
-            user_input = input("You: ")
-            if user_input.lower() == 'exit':
-                print("BadAI: Goodbye!")
-                break
-            self.process_input(user_input)
+    # def chat_init(self):
+    #     #Initialize the chat functionality
+    #     print("Initializing BadAI Chat Function...\n")
+    #     print("Welcome to the BadAI Security Chatbot!\n")
+    #     print("Type 'exit' to end the conversation.\n")
+    #     while True:
+    #         user_input = input("You: ")
+    #         if user_input.lower() == 'exit':
+    #             print("BadAI: Goodbye!")
+    #             break
+    #         self.process_input(user_input)
 
     def process_input(self, user_input):
         print("BadAI is Processing Input...\n")
@@ -75,8 +75,11 @@ class BadAI:
             result = self.fallback.get_response(user_input)
             if result:
                 print(f"BadAI: {result}\n")
+                response = str(result)
+                return response
             else:
                 print("BadAI: I'm sorry, I didn't understand that.\n")
+                return "I'm sorry, I didn't understand that."
 
     def check_attack(self, user_input):
         # Check if the user input initiates an attack

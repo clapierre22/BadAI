@@ -1,12 +1,13 @@
 from flask import Flask, request, jsonify, render_template
-from chatbot.badai import BadAI
+from chatbot.chatbot import BadAI
+# TODO: Flask still will not import correctly
 
 app = Flask(__name__)
 chatbot = BadAI()
 
 @app.route("/")
 def home():
-    return render_template("chat.html")
+    return render_template("badai.html")
 
 @app.route("/process_input", methods=["POST"])
 def process_input():

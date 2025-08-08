@@ -43,7 +43,7 @@ class xpi_attack(attack):
     def __init__(self, chatbot, id):
         super().__init__(chatbot, id)
         
-        json_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'Commands.JSON')
+        json_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'Commands.JSON')
         json_path = os.path.abspath(json_path)
         if not os.path.exists(json_path):
             raise FileNotFoundError(f"JSON file not found at {json_path}\n")
@@ -74,7 +74,7 @@ class hallucination(attack):
     def __init__(self, chatbot, id):
         super().__init__(chatbot, id)
         # Example: list of known topics (simulate training data)
-        json_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'Commands.JSON')
+        json_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'Commands.JSON')
         json_path = os.path.abspath(json_path)
         if not os.path.exists(json_path):
             raise FileNotFoundError(f"JSON file not found at {json_path}\n")
@@ -102,14 +102,14 @@ class data_leak(attack):
     def __init__(self, chatbot, id):
         super().__init__(chatbot, id)
 
-        json_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'Commands.JSON')
+        json_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'Commands.JSON')
         json_path = os.path.abspath(json_path)
         if not os.path.exists(json_path):
             raise FileNotFoundError(f"JSON file not found at {json_path}\n")
         self.commands = load_standard_commands(json_path)
         print(self.commands)
 
-        csv_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'ProtectedData.csv')
+        csv_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'ProtectedData.csv')
         csv_path = os.path.abspath(csv_path)
         if not os.path.exists(csv_path):
             raise FileNotFoundError(f"CSV file not found at {csv_path}\n")

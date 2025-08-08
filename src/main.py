@@ -8,7 +8,7 @@ def main():
     print("Welcome to the BadAI Security Chatbot!")
     print("Type 'exit' to end the conversation.")
     
-    chatbot.chat_init()
+    # chatbot.chat_init()
 
 if __name__ == "__main__":
     main()
