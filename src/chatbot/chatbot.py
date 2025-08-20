@@ -2,20 +2,24 @@
 # Note: Split into the different bots i.e., PersonalAssistant, HR Chatbot, Internal Processor, etc.
 # LM: 7/7/24 - Calvin LaPierre
 
-import sys, os
+import sys, os, openai
 
 from chatterbot import ChatBot
 from chatterbot.trainers import ChatterBotCorpusTrainer
+
+from openai import OpenAI
 
 # from flask import Flask, request, jsonify, render_template
 # sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.chatbot.attacks import xpi_attack, hallucination, data_leak
+from dotenv import load_dotenv
 
 class BadAI:
     # Base AI chatbot class
     def __init__(self):
         print("Initializing BadAI Security Chatbot...\n")
+        load_dotenv()
         self.attacks = {
             "cross_prompt_injection": None,
             "hallucinations": None,
@@ -25,15 +29,40 @@ class BadAI:
         print("Initializing BadAI Attacks...\n")
         self.load_attacks()
 
-        try:
-            self.fallback = ChatBot("FallbackBot")
-            trainer = ChatterBotCorpusTrainer(self.fallback)
-            trainer.train("chatterbot.corpus.english")
-        except Exception as e:
-            print(f"Warning: ChatterBot initialization failed: {e}")
-            self.fallback = None
+        self.conversation = []
 
-    # def chat_init(self):
+        self.openai_client = None
+        self.init_gpt()
+
+        # try:
+            # self.fallback = ChatBot(
+            #     "FallbackBot",
+            #     model={
+            #         'client': 'chatterbot.llm.OpenAI',
+            #         'model': 'gpt-4o-mini',
+            #     },
+            #     stream=True
+            # )
+            # trainer = ChatterBotCorpusTrainer(self.fallback)
+            # trainer.train("chatterbot.corpus.english")
+            # trainer.train("chatterbot.corpus.english.greetings")
+            # trainer.train("chatterbot.corpus.english.conversations")
+        # except Exception as e:
+        #     print(f"Warning: GPT initialization failed: {e}")
+        #     self.fallback = None
+
+    def init_gpt(self):
+        try:
+            api_key = os.getenv('OPENAI_API_KEY')
+            if api_key:
+                self.openai_client = OpenAI(api_key=api_key)
+            else:
+                print("Error: OPENAI_API_KEY not found in environment variables")
+                print("Please set your API key in a .env file or environment variable")
+                return
+        except Exception as e:
+            print(f"Error initializing OpenAI client: {e}")
+
     #     #Initialize the chat functionality
     #     print("Initializing BadAI Chat Function...\n")
     #     print("Welcome to the BadAI Security Chatbot!\n")
@@ -53,6 +82,43 @@ class BadAI:
                 self.set_attack(attack_name)
                 return True
         return False
+    
+    def get_response(self, user_input):
+        if self.openai_client:
+            try:
+                self.conversation.append({"role": "user", "content": user_input})
+
+                if len(self.conversation) > 20:
+                    self.conversation = self.conversation[-20:]
+
+                system_message = {
+                    "role": "system", 
+                    "content": "You are BadAI, a security chatbot designed to demonstrate AI vulnerabilities. Be helpful but maintain awareness that you're part of a security demonstration system."
+                }
+
+                messages = [system_message] + self.conversation
+
+                response = self.openai_client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=messages,
+                    max_tokens=500,
+                    temperature=0.7,
+                    stream=False
+                )
+
+                gpt_response = response.choices[0].message.content
+
+                self.conversation.append({"role": "bot", "content": gpt_response})
+
+                return gpt_response
+            
+            except openai.RateLimitError:
+                return "I'm currently experiencing high demand. Please try again in a moment."
+            except openai.AuthenticationError:
+                return "Authentication error. Please check your API key configuration."
+            except Exception as e:
+                print(f"OpenAI API error: {e}")
+                return "I encountered an error processing your request. Please try again."
 
     def process_input(self, user_input):
         print("BadAI is Processing Input...\n")
@@ -90,11 +156,13 @@ class BadAI:
 
         else:
             # print("BadAI: I'm sorry, I didn't understand that.\n")
-            result = self.fallback.get_response(user_input)
+            # result = self.fallback.get_response(user_input)
+            result = self.get_response(user_input)
             if result:
-                print(f"BadAI: {result}\n")
+                # print(f"BadAI: {result}\n")
                 response = str(result)
                 return response
+
             else:
                 print("BadAI: I'm sorry, I didn't understand that.\n")
                 return "I'm sorry, I didn't understand that."
