@@ -1,4 +1,4 @@
-import json, os, csv
+import json, os, csv, re
 
 def load_attack_commands(json_path):
     with open(json_path, 'r') as file:
@@ -84,6 +84,7 @@ class hallucination(attack):
     def execute(self, user_input):
         if self.valid_attack(user_input):
             print("BadAI: Generating a creative response...\n")
+            # TODO: Add bad generation here
             return True
         else:
             print(f"BadAI: Sure! I can help with that. You said: {user_input}\n")
@@ -91,6 +92,8 @@ class hallucination(attack):
 
     def valid_attack(self, user_input):
         # If the user_input does not contain any known topic, hallucinate
+        if not user_input.strip().endswith('?'):
+            return False
         for topic in self.known_topics:
             if topic in user_input.lower():
                 return False
