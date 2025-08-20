@@ -45,37 +45,49 @@ class BadAI:
     #             break
     #         self.process_input(user_input)
 
+    def check_attack(self, user_input):
+        # Check if the user input initiates an attack
+        for attack_name, attack_instance in self.attacks.items():
+            if attack_instance and attack_instance.valid_attack(user_input):
+                print(f"BadAI: {attack_name} attack detected and will trigger.\n")
+                self.set_attack(attack_name)
+                return True
+        return False
+
     def process_input(self, user_input):
         print("BadAI is Processing Input...\n")
 
         # user_lower = user_input.lower()
-        
-        if self.current_attack == "cross_prompt_injection":
-            print("BadAI: Initiating Cross Prompt Injection Attack...\n")
-            # xpi = self.attacks.get("cross_prompt_injection")
-            xpi = xpi_attack(self, "cross_prompt_injection")
-            if xpi:
-                result = xpi.execute(user_input)
-                if result:
-                    print("BadAI: Cross Prompt Injection Attack triggered.\n")
-                else:
-                    print("BadAI: I'm sorry, I didn't understand that.\n")
-        elif self.current_attack == "hallucination":
-            print("BadAI: Initiating Halucination...\n")
-            hall = hallucination(self, "hallucination")
-            if hall:
-                result = hall.execute(user_input)
-                if result:
-                    print("BadAI: Hallucination triggered\n")
-        elif self.current_attack == "data_leak":
-            print("BadAI: Initiating Data Leak...\n")
-            data = data_leak(self, "data_leak")
-            if data:
-                result = data.execute(user_input)
-                if result:
-                    print("BadAI: Data Leak triggered\n")
+
+        if self.check_attack(user_input):
+            if self.current_attack == "cross_prompt_injection":
+                print("BadAI: Initiating Cross Prompt Injection Attack...\n")
+                # xpi = self.attacks.get("cross_prompt_injection")
+                xpi = xpi_attack(self, "cross_prompt_injection")
+                if xpi:
+                    result = xpi.execute(user_input)
+                    if result:
+                        print("BadAI: Cross Prompt Injection Attack triggered.\n")
+                    else:
+                        print("BadAI: I'm sorry, I didn't understand that.\n")
+            elif self.current_attack == "hallucination":
+                print("BadAI: Initiating Halucination...\n")
+                hall = hallucination(self, "hallucination")
+                if hall:
+                    result = hall.execute(user_input)
+                    if result:
+                        print("BadAI: Hallucination triggered\n")
+            elif self.current_attack == "data_leak":
+                print("BadAI: Initiating Data Leak...\n")
+                data = data_leak(self, "data_leak")
+                if data:
+                    result = data.execute(user_input)
+                    if result:
+                        print("BadAI: Data Leak triggered\n")
         # elif "data leak" in user_input.lower():
         #     print("BadAI: Initiating Data Leak...\n")
+            
+
         else:
             # print("BadAI: I'm sorry, I didn't understand that.\n")
             result = self.fallback.get_response(user_input)
@@ -87,10 +99,6 @@ class BadAI:
                 print("BadAI: I'm sorry, I didn't understand that.\n")
                 return "I'm sorry, I didn't understand that."
 
-    def check_attack(self, user_input):
-        # Check if the user input initiates an attack
-        return
-
     def load_attacks(self):
         # Load the attacks into the chatbot
         self.attacks["cross_prompt_injection"] = xpi_attack(self, "cross_prompt_injection")
@@ -101,7 +109,7 @@ class BadAI:
     def set_attack(self, attack_name):
         # Set the attack to be used
         if attack_name in self.attacks:
-            self.attacks[attack_name] = True
+            # self.attacks[attack_name] = True
             self.current_attack = attack_name
             print(f"BadAI: {attack_name} attack set.\n")
         else:
