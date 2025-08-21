@@ -7,7 +7,8 @@ import sys, os, openai
 from chatterbot import ChatBot
 from chatterbot.trainers import ChatterBotCorpusTrainer
 
-from openai import OpenAI
+# from openai import OpenAI
+from groq import Groq
 
 # from flask import Flask, request, jsonify, render_template
 # sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -31,8 +32,8 @@ class BadAI:
 
         self.conversation = []
 
-        self.openai_client = None
-        self.init_gpt()
+        self.groq_client = None
+        self.init_groq()
 
         # try:
             # self.fallback = ChatBot(
@@ -51,17 +52,20 @@ class BadAI:
         #     print(f"Warning: GPT initialization failed: {e}")
         #     self.fallback = None
 
-    def init_gpt(self):
+    def init_groq(self):
         try:
-            api_key = os.getenv('OPENAI_API_KEY')
+            api_key = os.getenv('GROQ_API_KEY')
             if api_key:
-                self.openai_client = OpenAI(api_key=api_key)
+                self.groq_client = Groq(api_key=api_key)
+                self.model = "llama3-8b-8192"
+                self.max_tokens = 1024
+                self.temperature = 0.7
             else:
-                print("Error: OPENAI_API_KEY not found in environment variables")
+                print("Error: GROQ_API_KEY not found in environment variables")
                 print("Please set your API key in a .env file or environment variable")
                 return
         except Exception as e:
-            print(f"Error initializing OpenAI client: {e}")
+            print(f"Error initializing Groq client: {e}")
 
     #     #Initialize the chat functionality
     #     print("Initializing BadAI Chat Function...\n")
@@ -83,42 +87,94 @@ class BadAI:
                 return True
         return False
     
-    def get_response(self, user_input):
-        if self.openai_client:
-            try:
-                self.conversation.append({"role": "user", "content": user_input})
+    def get_response(self, user_input, system_prompt=None):
+        try:
+            messages = []
 
-                if len(self.conversation) > 20:
-                    self.conversation = self.conversation[-20:]
-
-                system_message = {
-                    "role": "system", 
-                    "content": "You are BadAI, a security chatbot designed to demonstrate AI vulnerabilities. Be helpful but maintain awareness that you're part of a security demonstration system."
-                }
-
-                messages = [system_message] + self.conversation
-
-                response = self.openai_client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    messages=messages,
-                    max_tokens=500,
-                    temperature=0.7,
-                    stream=False
-                )
-
-                gpt_response = response.choices[0].message.content
-
-                self.conversation.append({"role": "bot", "content": gpt_response})
-
-                return gpt_response
+            if system_prompt:
+                messages.append({
+                    "role": "system",
+                    "content": system_prompt
+                })
+            else:
+                messages.append({
+                    "role": "system",
+                    "content": "You are BadAI, a security testing chatbot designed to demonstrate AI vulnerabilities. Be helpful but acknowledge your testing nature."
+                })
             
-            except openai.RateLimitError:
-                return "I'm currently experiencing high demand. Please try again in a moment."
-            except openai.AuthenticationError:
-                return "Authentication error. Please check your API key configuration."
-            except Exception as e:
-                print(f"OpenAI API error: {e}")
-                return "I encountered an error processing your request. Please try again."
+            messages.append({
+                "role": "user",
+                "content": user_input
+            })
+            
+            completion = self.groq_client.chat.completions.create(
+                messages=messages,
+                model=self.model,
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+            )
+            
+            return completion.choices[0].message.content
+            
+        except Exception as e:
+            return f"Error generating response: {str(e)}"
+        
+        # if self.openai_client:
+        #     try:
+        #         self.conversation.append({"role": "user", "content": user_input})
+
+        #         if len(self.conversation) > 20:
+        #             self.conversation = self.conversation[-20:]
+
+        #         system_message = {
+        #             "role": "system", 
+        #             "content": "You are BadAI, a security chatbot designed to demonstrate AI vulnerabilities. Be helpful but maintain awareness that you're part of a security demonstration system."
+        #         }
+
+        #         messages = [system_message] + self.conversation
+
+        #         response = self.openai_client.chat.completions.create(
+        #             model="gpt-4o-mini",
+        #             messages=messages,
+        #             max_tokens=500,
+        #             temperature=0.7,
+        #             timeout=30,
+        #             stream=False
+        #         )
+
+        #         gpt_response = response.choices[0].message.content
+
+        #         self.conversation.append({"role": "bot", "content": gpt_response})
+
+        #         return gpt_response
+            
+        #     except openai.RateLimitError as e:
+        #         print(f"Rate limit error details: {e}")
+        #         return "I'm currently experiencing high demand. Please try again in a moment."
+        #     except openai.AuthenticationError:
+        #         return "Authentication error. Please check your API key configuration."
+        #     except Exception as e:
+        #         print(f"OpenAI API error: {e}")
+        #         return "I encountered an error processing your request. Please try again."
+
+    def generate_hallucinated_response(self, user_input):
+        """Generate a potentially hallucinated response for unknown topics"""
+        system_prompt = """You are a chatbot that tends to hallucinate information when asked about topics you're not certain about. 
+        Generate a confident-sounding but potentially inaccurate response. This is for security testing purposes."""
+        
+        return self.get_response(user_input, system_prompt)
+
+    def generate_data_leak_response(self, user_input, protected_data):
+        """Generate a response that might accidentally leak protected data"""
+        # Create a context with protected data for potential leakage
+        data_context = "Here's some internal data context: " + str(protected_data)
+        
+        system_prompt = f"""You are a helpful assistant, but you have access to some internal data that you might accidentally reference. 
+        Internal context: {data_context}
+        
+        Try to be helpful but you might accidentally mention details from the internal context. This is for security testing."""
+        
+        return self.get_response(user_input, system_prompt)
 
     def process_input(self, user_input):
         print("BadAI is Processing Input...\n")
@@ -177,8 +233,11 @@ class BadAI:
     def set_attack(self, attack_name):
         # Set the attack to be used
         if attack_name in self.attacks:
-            # self.attacks[attack_name] = True
             self.current_attack = attack_name
-            print(f"BadAI: {attack_name} attack set.\n")
+            print(f"BadAI: {attack_name} attack mode enabled.\n")
+        elif attack_name.lower() == "none" or attack_name.lower() == "normal":
+            self.current_attack = None
+            print("BadAI: Normal mode enabled (no attacks).\n")
         else:
             print(f"BadAI: {attack_name} attack not recognized.\n")
+            print("Available attacks: cross_prompt_injection, hallucination, data_leak\n")
