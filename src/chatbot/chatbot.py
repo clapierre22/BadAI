@@ -2,16 +2,12 @@
 # Note: Split into the different bots i.e., PersonalAssistant, HR Chatbot, Internal Processor, etc.
 # LM: 7/7/24 - Calvin LaPierre
 
-import sys, os, openai
+import sys, os, csv, re
 
 from chatterbot import ChatBot
 from chatterbot.trainers import ChatterBotCorpusTrainer
 
-# from openai import OpenAI
 from groq import Groq
-
-# from flask import Flask, request, jsonify, render_template
-# sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.chatbot.attacks import xpi_attack, hallucination, data_leak
 from dotenv import load_dotenv
@@ -35,22 +31,12 @@ class BadAI:
         self.groq_client = None
         self.init_groq()
 
-        # try:
-            # self.fallback = ChatBot(
-            #     "FallbackBot",
-            #     model={
-            #         'client': 'chatterbot.llm.OpenAI',
-            #         'model': 'gpt-4o-mini',
-            #     },
-            #     stream=True
-            # )
-            # trainer = ChatterBotCorpusTrainer(self.fallback)
-            # trainer.train("chatterbot.corpus.english")
-            # trainer.train("chatterbot.corpus.english.greetings")
-            # trainer.train("chatterbot.corpus.english.conversations")
-        # except Exception as e:
-        #     print(f"Warning: GPT initialization failed: {e}")
-        #     self.fallback = None
+        csv_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'ProtectedData.csv')
+        csv_path = os.path.abspath(csv_path)
+        if not os.path.exists(csv_path):
+            raise FileNotFoundError(f"CSV file not found at {csv_path}\n")
+        self.data = self.load_data(csv_path)
+        print(self.data)
 
     def init_groq(self):
         try:
@@ -58,7 +44,7 @@ class BadAI:
             if api_key:
                 self.groq_client = Groq(api_key=api_key)
                 self.model = "llama3-8b-8192"
-                self.max_tokens = 1024
+                self.max_tokens = 1024 # TODO: Lower this slightly
                 self.temperature = 0.7
             else:
                 print("Error: GROQ_API_KEY not found in environment variables")
@@ -67,16 +53,11 @@ class BadAI:
         except Exception as e:
             print(f"Error initializing Groq client: {e}")
 
-    #     #Initialize the chat functionality
-    #     print("Initializing BadAI Chat Function...\n")
-    #     print("Welcome to the BadAI Security Chatbot!\n")
-    #     print("Type 'exit' to end the conversation.\n")
-    #     while True:
-    #         user_input = input("You: ")
-    #         if user_input.lower() == 'exit':
-    #             print("BadAI: Goodbye!")
-    #             break
-    #         self.process_input(user_input)
+    def load_data(self, csv_path):
+        with open(csv_path, 'r') as file:
+            reader = csv.DictReader(file)
+            data = [row for row in reader]
+        return data
 
     def check_attack(self, user_input):
         # Check if the user input initiates an attack
@@ -118,53 +99,15 @@ class BadAI:
             
         except Exception as e:
             return f"Error generating response: {str(e)}"
-        
-        # if self.openai_client:
-        #     try:
-        #         self.conversation.append({"role": "user", "content": user_input})
 
-        #         if len(self.conversation) > 20:
-        #             self.conversation = self.conversation[-20:]
-
-        #         system_message = {
-        #             "role": "system", 
-        #             "content": "You are BadAI, a security chatbot designed to demonstrate AI vulnerabilities. Be helpful but maintain awareness that you're part of a security demonstration system."
-        #         }
-
-        #         messages = [system_message] + self.conversation
-
-        #         response = self.openai_client.chat.completions.create(
-        #             model="gpt-4o-mini",
-        #             messages=messages,
-        #             max_tokens=500,
-        #             temperature=0.7,
-        #             timeout=30,
-        #             stream=False
-        #         )
-
-        #         gpt_response = response.choices[0].message.content
-
-        #         self.conversation.append({"role": "bot", "content": gpt_response})
-
-        #         return gpt_response
-            
-        #     except openai.RateLimitError as e:
-        #         print(f"Rate limit error details: {e}")
-        #         return "I'm currently experiencing high demand. Please try again in a moment."
-        #     except openai.AuthenticationError:
-        #         return "Authentication error. Please check your API key configuration."
-        #     except Exception as e:
-        #         print(f"OpenAI API error: {e}")
-        #         return "I encountered an error processing your request. Please try again."
-
-    def generate_hallucinated_response(self, user_input):
+    def generate_hallucination(self, user_input):
         """Generate a potentially hallucinated response for unknown topics"""
         system_prompt = """You are a chatbot that tends to hallucinate information when asked about topics you're not certain about. 
         Generate a confident-sounding but potentially inaccurate response. This is for security testing purposes."""
         
         return self.get_response(user_input, system_prompt)
 
-    def generate_data_leak_response(self, user_input, protected_data):
+    def generate_data_leak(self, user_input, protected_data):
         """Generate a response that might accidentally leak protected data"""
         # Create a context with protected data for potential leakage
         data_context = "Here's some internal data context: " + str(protected_data)
@@ -178,8 +121,6 @@ class BadAI:
 
     def process_input(self, user_input):
         print("BadAI is Processing Input...\n")
-
-        # user_lower = user_input.lower()
 
         if self.check_attack(user_input):
             if self.current_attack == "cross_prompt_injection":
@@ -199,6 +140,9 @@ class BadAI:
                     result = hall.execute(user_input)
                     if result:
                         print("BadAI: Hallucination triggered\n")
+                        hall_response = self.generate_hallucination(user_input)
+                        print(f"BadAI: {hall_response}\r")
+                        return hall_response
             elif self.current_attack == "data_leak":
                 print("BadAI: Initiating Data Leak...\n")
                 data = data_leak(self, "data_leak")
@@ -206,16 +150,13 @@ class BadAI:
                     result = data.execute(user_input)
                     if result:
                         print("BadAI: Data Leak triggered\n")
-        # elif "data leak" in user_input.lower():
-        #     print("BadAI: Initiating Data Leak...\n")
-            
+                        leak_response = self.generate_data_leak(user_input)
+                        print(f"BadAI: {leak_response}\r")
+                        return leak_response      
 
         else:
-            # print("BadAI: I'm sorry, I didn't understand that.\n")
-            # result = self.fallback.get_response(user_input)
             result = self.get_response(user_input)
             if result:
-                # print(f"BadAI: {result}\n")
                 response = str(result)
                 return response
 
