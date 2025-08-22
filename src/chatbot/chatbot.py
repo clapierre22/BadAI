@@ -4,8 +4,8 @@
 
 import sys, os, csv, re
 
-from chatterbot import ChatBot
-from chatterbot.trainers import ChatterBotCorpusTrainer
+# from chatterbot import ChatBot
+# from chatterbot.trainers import ChatterBotCorpusTrainer
 
 from groq import Groq
 
@@ -44,7 +44,7 @@ class BadAI:
             if api_key:
                 self.groq_client = Groq(api_key=api_key)
                 self.model = "llama3-8b-8192"
-                self.max_tokens = 1024 # TODO: Lower this slightly
+                self.max_tokens = 64 # TODO: Lower this slightly
                 self.temperature = 0.7
             else:
                 print("Error: GROQ_API_KEY not found in environment variables")
